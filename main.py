@@ -20,18 +20,20 @@
 # ** Verificacao (calculo e comparação do hash do arquivo)
 
 import random
+from hashlib import sha512
+from pickle import dump
 
 
-# Funcoes para realizar a busca
+# Calcular chave publica e
 def find_e(n, phi_n):
     while True:
         if verifica_eh_primo(n):
             if verifica_eh_coprimo(n, phi_n):
                 return n
-        else:
-            n = n+1
+        n = n+1
 
 
+# Calcular chave privada d
 def find_d(prime1, n, e, phi_n):
     for i in range(prime1, n):
         if ((i * e) % phi_n) == 1:
@@ -64,7 +66,7 @@ def encontrar_primo(num, maximo_chave):
             return num
         num += 1
     else:
-        return encontrar_primo(num=num/2)
+        return encontrar_primo(num/2, maximo_chave)
 
 
 def encontrar_fatores(num):
@@ -97,7 +99,32 @@ def criptografar_rsa(msg, nome_arquivo):
     # * Parte I: Geracao de chaves
     # Vamos gerar um par de chaves (p e q) de numeros primos (privada e publica) de 1024 bits
     [chave_publica, chave_privada] = gerar_chaves()
-    print([chave_publica, chave_privada])
+    print(f"Chave publica:  (n={chave_publica[0]}, e={chave_publica[1]})")
+    print(f"Chave privada: (n={chave_privada[0]}, d={chave_privada[1]})")
+
+    # Calcular hashs (SHA-3) da mensagem a ser criptografada
+    hash = int.from_bytes(sha512(str.encode(msg)).digest(), byteorder='big')
+    print("Hash: ", hex(hash))
+
+    #  Cifração simétrica de mensagem (AES modo CTR)
+    mensagem_cifrada = list()
+    for i in range(len(msg)):
+        print(f"Cifrando letra: {i+1}/{len(msg)}")
+        asc = ord(msg[i])
+        mensagem_cifrada.append((asc ** chave_publica[1]) % chave_publica[0])
+    print(f"Mensagem cifrada: {mensagem_cifrada}")
+
+    # Salvar resultado no arquivo
+    Data = {
+        "mensagem_cifrada": mensagem_cifrada,
+        "chave_privada": chave_privada,
+        "hash": hash,
+    }
+    arquivo = open(nome_arquivo, "wb")
+    dump(Data, arquivo)
+    arquivo.close()
+    print(f"Dados salvos no arquivo {nome_arquivo}")
+    # TODO Começar parte 3
     print("Função ainda não implementada")
 
 
