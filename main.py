@@ -175,18 +175,25 @@ def criptografar_rsa(msg, nome_arquivo):
     print(f"Chave publica:  (n={chave_publica[0]}, e={chave_publica[1]})")
     print(f"Chave privada: (n={chave_privada[0]}, d={chave_privada[1]})")
     mensagem_cifrada = list()
+    hash_cifrado = list()
     for i in range(len(msg)):
-        print(f"Cifrando letra: {i+1}/{len(msg)}")
+        print(f"Cifrando letra msg: {i+1}/{len(msg)}")
         asc = ord(msg[i])
         mensagem_cifrada.append((asc ** chave_publica[1]) % chave_publica[0])
-    # TODO implementar CTR
+    hash_str = str(hash)
+    for i in range(len(hash_str)):
+        print(f"Cifrando letra hash: {i+1}/{len(hash_str)}")
+        asc = ord(hash_str[i])
+        hash_cifrado.append((asc ** chave_publica[1]) % chave_publica[0])
     print(f"Mensagem cifrada: {mensagem_cifrada}")
+    print(f"Hash cifrado: {hash_cifrado}")
 
     # Salvar resultado no arquivo
     Data = {
         "mensagem_cifrada": mensagem_cifrada,
         "chave_privada": chave_privada,
         "hash": hash,
+        "hash_cifrado": hash_cifrado,
     }
     arquivo = open(nome_arquivo, "wb")
     dump(Data, arquivo)
@@ -198,10 +205,11 @@ def decifrar_mensagem(msg_cifrada, chave_privada_n, chave_privada_d):
     msg = list()
     for i in range(len(msg_cifrada)):
         print(f"Decifrando letra: {i + 1}/{len(msg_cifrada)}")
-        letra = ((msg_cifrada[i] ** chave_privada_d)% chave_privada_n)
+        letra = ((msg_cifrada[i] ** chave_privada_d) % chave_privada_n)
         msg.append(chr(letra))
 
-    return(''.join(msg))
+    return ''.join(msg)
+
 
 # Funcao para ler a criptografia RSA
 def ler_rsa(nome_arquivo):
@@ -209,6 +217,7 @@ def ler_rsa(nome_arquivo):
     mensagem_cifrada = list()
     chave_privada = list()
     hash = 0
+    hash_cifrado = 0
     try:
         arquivo = open(nome_arquivo, "rb")
         fileRead = load(arquivo)
@@ -216,23 +225,31 @@ def ler_rsa(nome_arquivo):
         mensagem_cifrada = fileRead["mensagem_cifrada"]
         chave_privada = fileRead["chave_privada"]
         hash = fileRead["hash"]
+        hash_cifrado = fileRead["hash_cifrado"]
         print(f"Mensagem cifrada para ser decifrada: {mensagem_cifrada}")
         print(f"Chave Privada: {chave_privada}")
         print(f"Hash: {hash}")
+        print(f"Hash cifrado: {hash_cifrado}")
         print(f"Arquivo lido com sucesso {nome_arquivo}")
 
         # Decifra a mensagem
         mensagem_decifrada = decifrar_mensagem(mensagem_cifrada, chave_privada[0], chave_privada[1])
+        hash_cifrado_decifrado = decifrar_mensagem(hash_cifrado, chave_privada[0], chave_privada[1])
         print(f"Mensagem decifrada: {mensagem_decifrada}")
+        print(f"Hash decifrado: {hash_cifrado_decifrado}")
+        print(f"Hash esperado : {hash}")
 
         # Calcula e compara os Hashs
-        hash_msg_decifrada = int.from_bytes(sha512(str.encode(msg)).digest(), byteorder='big')
-        if hash_msg_decifrada == hash:
+        hash_msg_decifrada = int.from_bytes(sha512(str.encode(mensagem_decifrada)).digest(), byteorder='big')
+        print(f"Hash msg      : {hash_msg_decifrada}")
+        if str(hash_msg_decifrada) == str(hash_cifrado_decifrado):
             print(f"Os hashs são iguais")
         else:
             print(f"Os hashs são diferentes")
-    except:
+    except Exception as e:
         print("Não foi possível ler o arquivo. Execute primeiramente a parte de criação dele e verifique se o arquivo gerado está na pasta correta")
+        print(e)
+
 
 # Usamos o comeco do codigo para que o usuario escolha qual operacao deve ser feita: Gerador ou verificar assinatura
 if __name__ == '__main__':
