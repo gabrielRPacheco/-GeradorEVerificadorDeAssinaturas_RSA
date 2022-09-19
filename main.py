@@ -80,6 +80,7 @@ k_ex = [
 ]
 exp = []
 
+
 # Calcular chave publica e
 def find_e(n, phi_n):
     while True:
@@ -136,11 +137,12 @@ def encontrar_fatores(num):
 # Funcao para gerar chaves publica e privada
 def gerar_chaves():
     print("Geração de chaves (p e q primos com no mínimo de 1024 bits)")
-    maximo_chave = 10000
+    # Ajuste aqui o tamahho dos numeros primos desejados (impacto grande no tempo de execucao)
+    maximo_chave = 1000
     p = encontrar_primo(random.randint(0, maximo_chave), maximo_chave)
     q = encontrar_primo(random.randint(0, maximo_chave), maximo_chave)
 
-    # totient
+    # Funcao totiente
     phi_n = (p-1) * (q-1)
     n = p * q
 
@@ -160,11 +162,7 @@ def criptografar_rsa(msg, nome_arquivo):
 
     # * Parte I: Geracao de chaves
     key = 0xe953a7537e7db0768af36a02d8160b87
-
-
-
-
-
+    # TODO: Implementar isso
 
 
     # ***** RSA *****
@@ -195,10 +193,19 @@ def criptografar_rsa(msg, nome_arquivo):
     arquivo.close()
     print(f"Dados salvos no arquivo {nome_arquivo}")
 
+def decifrar_mensagem(msg_cifrada, chave_privada_n, chave_privada_d):
+    print(f"Decifrando a mensagem")
+    msg = list()
+    for i in range(len(msg_cifrada)):
+        print(f"Decifrando letra: {i + 1}/{len(msg_cifrada)}")
+        letra = ((msg_cifrada[i] ** chave_privada_d)% chave_privada_n)
+        msg.append(chr(letra))
+
+    return(''.join(msg))
 
 # Funcao para ler a criptografia RSA
 def ler_rsa(nome_arquivo):
-    # Inicialmente valor ler a mensagem do arquivo gerado
+    # Inicialmente ler os dados do arquivo gerado
     mensagem_cifrada = list()
     chave_privada = list()
     hash = 0
@@ -209,13 +216,23 @@ def ler_rsa(nome_arquivo):
         mensagem_cifrada = fileRead["mensagem_cifrada"]
         chave_privada = fileRead["chave_privada"]
         hash = fileRead["hash"]
+        print(f"Mensagem cifrada para ser decifrada: {mensagem_cifrada}")
+        print(f"Chave Privada: {chave_privada}")
+        print(f"Hash: {hash}")
+        print(f"Arquivo lido com sucesso {nome_arquivo}")
+
+        # Decifra a mensagem
+        mensagem_decifrada = decifrar_mensagem(mensagem_cifrada, chave_privada[0], chave_privada[1])
+        print(f"Mensagem decifrada: {mensagem_decifrada}")
+
+        # Calcula e compara os Hashs
+        hash_msg_decifrada = int.from_bytes(sha512(str.encode(msg)).digest(), byteorder='big')
+        if hash_msg_decifrada == hash:
+            print(f"Os hashs são iguais")
+        else:
+            print(f"Os hashs são diferentes")
     except:
         print("Não foi possível ler o arquivo. Execute primeiramente a parte de criação dele e verifique se o arquivo gerado está na pasta correta")
-    print(f"Mensagem cifrada para ser decifrada: {mensagem_cifrada}")
-    print(f"Chave Privada: {chave_privada}")
-    print(f"Hash: {hash}")
-    print(f"Arquivo lido com sucesso {nome_arquivo}")
-
 
 # Usamos o comeco do codigo para que o usuario escolha qual operacao deve ser feita: Gerador ou verificar assinatura
 if __name__ == '__main__':
