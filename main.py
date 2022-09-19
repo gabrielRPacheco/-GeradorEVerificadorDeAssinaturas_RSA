@@ -167,7 +167,7 @@ def criptografar_rsa(msg, nome_arquivo):
 
 
     # ***** RSA *****
-    # Calcular hashs (SHA-3) da mensagem
+    # Calcular hash (SHA-3) da mensagem
     hash = int.from_bytes(sha512(str.encode(msg)).digest(), byteorder='big')
     print("Hash: ", hex(hash))
 
@@ -240,13 +240,13 @@ def ler_rsa(nome_arquivo):
         print(f"Hash decifrado: {hash_cifrado_decifrado}")
         print(f"Hash esperado : {hash}")
 
-        # Calcula e compara os Hashs
+        # Calcula e compara os hashes
         hash_msg_decifrada = int.from_bytes(sha512(str.encode(mensagem_decifrada)).digest(), byteorder='big')
         print(f"Hash msg      : {hash_msg_decifrada}")
         if str(hash_msg_decifrada) == str(hash_cifrado_decifrado):
-            print(f"Os hashs são iguais")
+            print(f"Os hashes são iguais")
         else:
-            print(f"Os hashs são diferentes")
+            print(f"Os hashes são diferentes")
     except Exception as e:
         print("Não foi possível ler o arquivo. Execute primeiramente a parte de criação dele e verifique se o arquivo gerado está na pasta correta")
         print(e)
