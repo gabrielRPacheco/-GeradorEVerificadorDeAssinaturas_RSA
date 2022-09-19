@@ -161,7 +161,8 @@ def criptografar_rsa(msg, nome_arquivo):
     # KeyExpansion, AddRoundKey, SubBytes, ShiftRows, MixColumns, AddRoundKey, SubBytes, ShiftRows, AddRoundKey
 
     # * Parte I: Geracao de chaves
-    key = 0xe953a7537e7db0768af36a02d8160b87
+    key = random.getrandbits(128)
+    print(f"Chave gerada: {(hex(key))}")
     # TODO: Implementar isso
 
 
